@@ -14,50 +14,80 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+// public function sendOtp(Request $request){
+//         $request->validate([
+//             'email'=>'required|email',
+//         ]);
+
+//         $existing = User::where('email',$request->email)->first();
+
+//         if($existing){
+//             return response()->json([
+//                 'message'=>'Email already registered .Please login'
+//             ],422);
+//         }
+
+//         $otp = str_pad(random_int(0,999999),6,'0',STR_PAD_LEFT);
+
+//         OTP::where('email',$request->email)->delete();
+
+//         $otpRecord = Otp::create([
+//             'email'=>$request->email,
+//             'otp'=>$otp,
+//             'expires_at'=>now()->addMinutes(10),
+//         ]);
+
+
+//         try{
+//              Mail::raw("Your CalTrack verification code is: {$otp}\n\nThis code expires in 10 minutes.", function ($message) use ($request) {
+//                 $message->to($request->email)
+//                        ->subject('CalTrack - Email Verification Code');
+//             });
+//                return response()->json([
+//                 'message' => 'OTP sent successfully to your email.',
+//                 'expires_in_minutes' => 10,
+//             ]);
+
+//         }catch(\Exception $e){
+//             return response()->json([
+//                 'status'=>'error',
+//                 'message'=>'OTP generated',
+//                 'dev_otp'=>$otp,
+//                 'expires_in_minutes'=>10,
+//             ]);
+//         }
+
+//     }
 public function sendOtp(Request $request){
-        $request->validate([
-            'email'=>'required|email',
-        ]);
+    $request->validate([
+        'email'=>'required|email',
+    ]);
 
-        $existing = User::where('email',$request->email)->first();
+    $existing = User::where('email',$request->email)->first();
 
-        if($existing){
-            return response()->json([
-                'message'=>'Email already registered .Please login'
-            ],422);
-        }
-
-        $otp = str_pad(random_int(0,999999),6,'0',STR_PAD_LEFT);
-
-        OTP::where('email',$request->email)->delete();
-
-        $otpRecord = Otp::create([
-            'email'=>$request->email,
-            'otp'=>$otp,
-            'expires_at'=>now()->addMinutes(10),
-        ]);
-
-
-        try{
-             Mail::raw("Your CalTrack verification code is: {$otp}\n\nThis code expires in 10 minutes.", function ($message) use ($request) {
-                $message->to($request->email)
-                       ->subject('CalTrack - Email Verification Code');
-            });
-               return response()->json([
-                'message' => 'OTP sent successfully to your email.',
-                'expires_in_minutes' => 10,
-            ]);
-
-        }catch(\Exception $e){
-            return response()->json([
-                'status'=>'error',
-                'message'=>'OTP generated',
-                'dev_otp'=>$otp,
-                'expires_in_minutes'=>10,
-            ]);
-        }
-
+    if($existing){
+        return response()->json([
+            'message'=>'Email already registered .Please login'
+        ],422);
     }
+
+    $otp = str_pad(random_int(0,999999),6,'0',STR_PAD_LEFT);
+
+    OTP::where('email',$request->email)->delete();
+
+    $otpRecord = Otp::create([
+        'email'=>$request->email,
+        'otp'=>$otp,
+        'expires_at'=>now()->addMinutes(10),
+    ]);
+
+    // ALWAYS return OTP in response (remove in production)
+    return response()->json([
+        'message' => 'OTP generated successfully',
+        'dev_otp' => $otp,
+        'expires_in_minutes' => 10,
+    ]);
+}
 
     public function verifyOtp(Request $request){
         $request->validate([
